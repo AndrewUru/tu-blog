@@ -1,249 +1,250 @@
 "use client";
 
-import Link from "next/link";
 import {
-  ArrowLeft,
-  BarChart3,
-  Edit3,
-  Globe,
-  Layout,
+  Briefcase,
+  Calendar,
+  ChevronRight,
+  FileText,
+  Home as HomeIcon,
   LayoutDashboard,
-  Megaphone,
   Menu,
-  Newspaper,
+  Receipt,
   Settings,
-  FileCode,
-  Github,
+  Users,
+  X,
+  BookOpen,
 } from "lucide-react";
-import {
-  useParams,
-  usePathname,
-  useSelectedLayoutSegments,
-} from "next/navigation";
-import { ReactNode, useEffect, useMemo, useState } from "react";
-import { getSiteFromPostId } from "@/lib/actions";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { ReactNode, useMemo, useState } from "react";
 
-const externalLinks = [
+type NavLink = {
+  name: string;
+  href: string;
+  icon: ReactNode;
+  description?: string;
+};
+
+const primaryLinks: NavLink[] = [
   {
-    name: "Read announcement",
-    href: "https://vercel.com/blog/platforms-starter-kit",
-    icon: <Megaphone width={18} />,
+    name: "Inicio",
+    href: "/home",
+    icon: <HomeIcon width={18} />,
+    description: "Explora el portal y descubre los servicios.",
   },
   {
-    name: "Star on GitHub",
-    href: "https://github.com/vercel/platforms",
-    icon: <Github width={18} />,
+    name: "Dashboard",
+    href: "/app",
+    icon: <LayoutDashboard width={18} />,
+    description: "Resumen semanal y metricas personales.",
   },
   {
-    name: "Read the guide",
-    href: "https://vercel.com/guides/nextjs-multi-tenant-application",
-    icon: <FileCode width={18} />,
+    name: "Proyectos",
+    href: "/app/projects",
+    icon: <Briefcase width={18} />,
+    description: "Roadmap activo, entregables y estatus.",
   },
   {
-    name: "View demo site",
-    href: "https://demo.vercel.pub",
-    icon: <Layout width={18} />,
+    name: "Calendario",
+    href: "/app/calendar",
+    icon: <Calendar width={18} />,
+    description: "Reuniones, bloqueos y recordatorios.",
   },
   {
-    name: "Deploy your own",
-    href: "https://vercel.com/templates/next.js/platforms-starter-kit",
-    icon: (
-      <svg
-        width={18}
-        viewBox="0 0 76 76"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="py-1 text-black dark:text-white"
-      >
-        <path d="M37.5274 0L75.0548 65H0L37.5274 0Z" fill="currentColor" />
-      </svg>
-    ),
+    name: "Clientes",
+    href: "/app/clients",
+    icon: <Users width={18} />,
+    description: "Contactos, notas y objetivos por cuenta.",
+  },
+  {
+    name: "Facturacion",
+    href: "/app/invoices",
+    icon: <Receipt width={18} />,
+    description: "Facturas, pagos y reportes recurrentes.",
+  },
+  {
+    name: "Recursos",
+    href: "/app/resources",
+    icon: <BookOpen width={18} />,
+    description: "Componentes Gutenberg, snippets y guias.",
+  },
+  {
+    name: "Configuracion",
+    href: "/app/settings",
+    icon: <Settings width={18} />,
+    description: "Perfil profesional, tarifas y preferencias.",
+  },
+];
+
+const quickActions: NavLink[] = [
+  {
+    name: "Nueva propuesta",
+    href: "/app/proposals/new",
+    icon: <FileText width={16} />,
+  },
+  {
+    name: "Actualizar disponibilidad",
+    href: "/app/availability",
+    icon: <Calendar width={16} />,
+  },
+  {
+    name: "Registrar entregable",
+    href: "/app/tasks/new",
+    icon: <Briefcase width={16} />,
   },
 ];
 
 export default function Nav({ children }: { children: ReactNode }) {
-  const segments = useSelectedLayoutSegments();
-  const { id } = useParams() as { id?: string };
-
-  const [siteId, setSiteId] = useState<string | null>();
-
-  useEffect(() => {
-    if (segments[0] === "post" && id) {
-      getSiteFromPostId(id).then((id) => {
-        setSiteId(id);
-      });
-    }
-  }, [segments, id]);
-
-  const tabs = useMemo(() => {
-    if (segments[0] === "site" && id) {
-      return [
-        {
-          name: "Back to All Sites",
-          href: "/sites",
-          icon: <ArrowLeft width={18} />,
-        },
-        {
-          name: "Posts",
-          href: `/site/${id}`,
-          isActive: segments.length === 2,
-          icon: <Newspaper width={18} />,
-        },
-        {
-          name: "Analytics",
-          href: `/site/${id}/analytics`,
-          isActive: segments.includes("analytics"),
-          icon: <BarChart3 width={18} />,
-        },
-        {
-          name: "Settings",
-          href: `/site/${id}/settings`,
-          isActive: segments.includes("settings"),
-          icon: <Settings width={18} />,
-        },
-      ];
-    } else if (segments[0] === "post" && id) {
-      return [
-        {
-          name: "Back to All Posts",
-          href: siteId ? `/site/${siteId}` : "/sites",
-          icon: <ArrowLeft width={18} />,
-        },
-        {
-          name: "Editor",
-          href: `/post/${id}`,
-          isActive: segments.length === 2,
-          icon: <Edit3 width={18} />,
-        },
-        {
-          name: "Settings",
-          href: `/post/${id}/settings`,
-          isActive: segments.includes("settings"),
-          icon: <Settings width={18} />,
-        },
-      ];
-    }
-    return [
-      {
-        name: "Overview",
-        href: "/",
-        isActive: segments.length === 0,
-        icon: <LayoutDashboard width={18} />,
-      },
-      {
-        name: "Sites",
-        href: "/sites",
-        isActive: segments[0] === "sites",
-        icon: <Globe width={18} />,
-      },
-      {
-        name: "Settings",
-        href: "/settings",
-        isActive: segments[0] === "settings",
-        icon: <Settings width={18} />,
-      },
-    ];
-  }, [segments, id, siteId]);
-
-  const [showSidebar, setShowSidebar] = useState(false);
-
   const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => {
-    // hide sidebar on path change
-    setShowSidebar(false);
-  }, [pathname]);
+  const resolvedLinks = useMemo(
+    () =>
+      primaryLinks.map((link) => {
+        let isActive = false;
+        if (link.href === "/app") {
+          isActive = pathname === "/app" || pathname === "/app/";
+        } else if (link.href === "/home") {
+          isActive = pathname === "/" || pathname.startsWith("/home");
+        } else {
+          isActive = pathname.startsWith(link.href);
+        }
+        return { ...link, isActive };
+      }),
+    [pathname],
+  );
 
-  return (
-    <>
-      <button
-        className={`fixed z-20 ${
-          // left align for Editor, right align for other pages
-          segments[0] === "post" && segments.length === 2 && !showSidebar
-            ? "left-5 top-5"
-            : "right-5 top-7"
-        } sm:hidden`}
-        onClick={() => setShowSidebar(!showSidebar)}
-      >
-        <Menu width={20} />
-      </button>
-      <div
-        className={`transform ${
-          showSidebar ? "w-full translate-x-0" : "-translate-x-full"
-        } fixed z-10 flex h-full flex-col justify-between border-r border-stone-200 bg-stone-100 p-4 transition-all sm:w-60 sm:translate-x-0 dark:border-stone-700 dark:bg-stone-900`}
-      >
-        <div className="grid gap-2">
-          <div className="flex items-center space-x-2 rounded-lg px-2 py-1.5">
-            <a
-              href="https://vercel.com/templates/next.js/platforms-starter-kit"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-lg p-1.5 hover:bg-stone-200 dark:hover:bg-stone-700"
-            >
-              <svg
-                width="26"
-                viewBox="0 0 76 65"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="text-black dark:text-white"
-              >
-                <path
-                  d="M37.5274 0L75.0548 65H0L37.5274 0Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </a>
-            <div className="h-6 rotate-[30deg] border-l border-stone-400 dark:border-stone-500" />
-            <Link
-              href="/"
-              className="rounded-lg p-2 hover:bg-stone-200 dark:hover:bg-stone-700"
-            >
+  const navContent = (
+    <aside className="flex h-full flex-col justify-between border-slate-800 bg-slate-950/70 p-6">
+      <div className="space-y-8">
+        <div className="flex items-center gap-3">
+          <Link href="/home" className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/10">
               <Image
                 src="/logo.png"
+                alt="WordPress Partner Network"
                 width={24}
                 height={24}
-                alt="Logo"
-                className="dark:scale-110 dark:rounded-full dark:border dark:border-stone-400"
+                className="rounded-lg"
               />
-            </Link>
-          </div>
-          <div className="grid gap-1">
-            {tabs.map(({ name, href, isActive, icon }) => (
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">
+                WordPress Partner Network
+              </p>
+              <p className="text-[11px] uppercase tracking-[0.25em] text-blue-200">
+                Developers
+              </p>
+            </div>
+          </Link>
+        </div>
+
+        <nav className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-500">
+            Navegacion
+          </p>
+          <div className="space-y-1">
+            {resolvedLinks.map(({ name, href, icon, isActive, description }) => (
               <Link
                 key={name}
                 href={href}
-                className={`flex items-center space-x-3 ${
-                  isActive ? "bg-stone-200 text-black dark:bg-stone-700" : ""
-                } rounded-lg px-2 py-1.5 transition-all duration-150 ease-in-out hover:bg-stone-200 active:bg-stone-300 dark:text-white dark:hover:bg-stone-700 dark:active:bg-stone-800`}
+                className={`group flex items-start gap-3 rounded-2xl border border-transparent px-3 py-3 transition ${
+                  isActive
+                    ? "border-blue-500/40 bg-blue-500/10 text-white"
+                    : "text-slate-300 hover:border-blue-500/30 hover:bg-blue-500/5 hover:text-white"
+                }`}
               >
-                {icon}
-                <span className="text-sm font-medium">{name}</span>
+                <span
+                  className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-xl border ${
+                    isActive
+                      ? "border-blue-500/60 bg-blue-500/20 text-blue-200"
+                      : "border-slate-700 bg-slate-900 text-slate-400 group-hover:border-blue-500/40 group-hover:text-blue-200"
+                  }`}
+                >
+                  {icon}
+                </span>
+                <span className="flex flex-col text-left">
+                  <span className="text-sm font-semibold">{name}</span>
+                  {description ? (
+                    <span className="text-xs text-slate-500 group-hover:text-slate-300">
+                      {description}
+                    </span>
+                  ) : null}
+                </span>
+                <ChevronRight
+                  width={16}
+                  className={`ml-auto mt-1 transition ${
+                    isActive
+                      ? "text-blue-200"
+                      : "text-slate-600 group-hover:text-blue-200"
+                  }`}
+                />
+              </Link>
+            ))}
+          </div>
+        </nav>
+
+        <div className="space-y-3">
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-500">
+            Acciones rapidas
+          </p>
+          <div className="space-y-2">
+            {quickActions.map(({ name, href, icon }) => (
+              <Link
+                key={name}
+                href={href}
+                className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/60 px-3 py-2 text-sm text-blue-200 transition hover:border-blue-500/40 hover:bg-blue-500/10 hover:text-blue-100"
+              >
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-blue-500/40 bg-blue-500/10 text-blue-200">
+                  {icon}
+                </span>
+                {name}
               </Link>
             ))}
           </div>
         </div>
-        <div>
-          <div className="grid gap-1">
-            {externalLinks.map(({ name, href, icon }) => (
-              <a
-                key={name}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between rounded-lg px-2 py-1.5 transition-all duration-150 ease-in-out hover:bg-stone-200 active:bg-stone-300 dark:text-white dark:hover:bg-stone-700 dark:active:bg-stone-800"
-              >
-                <div className="flex items-center space-x-3">
-                  {icon}
-                  <span className="text-sm font-medium">{name}</span>
-                </div>
-                <p>↗</p>
-              </a>
-            ))}
-          </div>
-          <div className="my-2 border-t border-stone-200 dark:border-stone-700" />
+      </div>
+
+      <div className="space-y-3">
+        <div className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-4">
+          <p className="text-sm font-semibold text-white">
+            Comparte un caso de exito
+          </p>
+          <p className="mt-1 text-xs text-blue-100">
+            Documenta aprendizajes de tus proyectos WordPress y ayuda a otros
+            especialistas.
+          </p>
+          <Link
+            href="/app/resources/share"
+            className="mt-3 inline-flex text-xs font-semibold text-blue-200 underline decoration-blue-500 underline-offset-4 hover:text-blue-100"
+          >
+            Enviar recurso
+          </Link>
+        </div>
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
           {children}
         </div>
+      </div>
+    </aside>
+  );
+
+  return (
+    <>
+      <button
+        className="fixed left-4 top-5 z-30 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-800 bg-slate-950 text-slate-200 shadow-lg transition hover:border-blue-500/40 hover:text-white sm:hidden"
+        onClick={() => setMobileOpen((prev) => !prev)}
+        aria-label="Abrir navegacion"
+      >
+        {mobileOpen ? <X width={20} /> : <Menu width={20} />}
+      </button>
+
+      <div
+        className={`fixed inset-y-0 left-0 z-20 w-72 transform border-r border-slate-800 bg-slate-950/90 backdrop-blur transition duration-300 sm:translate-x-0 ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"
+        }`}
+      >
+        {navContent}
       </div>
     </>
   );
