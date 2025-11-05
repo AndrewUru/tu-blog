@@ -59,13 +59,22 @@ export default async function middleware(req: NextRequest) {
   }
 
   // rewrite root application to `/home` folder
-  if (
+  const isRootHost =
     hostname === "localhost:3000" ||
-    hostname === process.env.NEXT_PUBLIC_ROOT_DOMAIN
-  ) {
-    return NextResponse.rewrite(
-      new URL(`/home${path === "/" ? "" : path}`, req.url),
-    );
+    hostname === process.env.NEXT_PUBLIC_ROOT_DOMAIN ||
+    hostname === `www.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
+
+  if (isRootHost) {
+    if (path === "/" || path.startsWith("/home")) {
+      const normalizedPath = path === "/" ? "" : path.replace(/^\/home/, "");
+      return NextResponse.rewrite(new URL(`/home${normalizedPath}`, req.url));
+    }
+
+    if (path.startsWith("/app")) {
+      return NextResponse.rewrite(new URL(path, req.url));
+    }
+
+    return NextResponse.rewrite(new URL(`/home${path}`, req.url));
   }
 
   // rewrite everything else to `/[domain]/[slug] dynamic route
